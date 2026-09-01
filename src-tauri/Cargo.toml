@@ -1,6 +1,6 @@
 [package]
 name = "log-timeline"
-version = "0.1.0"
+version = "0.1.1"
 description = "Merge logs and generate a timeline"
 authors = ["LogTimeLine"]
 edition = "2021"
