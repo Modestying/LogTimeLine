@@ -53,7 +53,7 @@ Release builds are desktop installers. No Node.js required.
 
 | OS | Artifact | How to run |
 | --- | --- | --- |
-| macOS | `LogTimeLine_x.x.x_universal.dmg` | Open the dmg, drag to Applications |
+| macOS | `LogTimeLine_x.x.x_aarch64.dmg` | Open the dmg, drag to Applications (Apple Silicon) |
 | Windows | `LogTimeLine_x.x.x_x64-setup.exe` | Double-click to install |
 | Linux | `.AppImage` or `.deb` | Make the AppImage executable, then run it |
 
@@ -85,7 +85,7 @@ Output:
 src-tauri/target/release/bundle/dmg/LogTimeLine_0.1.0_aarch64.dmg
 ```
 
-A local build matches the current CPU (Apple Silicon → `aarch64`). GitHub Release produces a universal Mac binary.
+A local build matches the current CPU (Apple Silicon → `aarch64`). GitHub Release on `macos-latest` also produces an Apple Silicon package.
 
 ## Development
 

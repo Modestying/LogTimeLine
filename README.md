@@ -51,7 +51,7 @@ go-zero 默认 JSON 日志是**每行一条**，字段与本工具对齐，例�
 
 | 系统 | 下载文件 | 用法 |
 | --- | --- | --- |
-| macOS | `LogTimeLine_x.x.x_universal.dmg` | 打开 dmg，拖到「应用程序」 |
+| macOS | `LogTimeLine_x.x.x_aarch64.dmg` | 打开 dmg，拖到「应用程序」（Apple Silicon） |
 | Windows | `LogTimeLine_x.x.x_x64-setup.exe` | 双击安装 |
 | Linux | `.AppImage` 或 `.deb` | AppImage 赋权后双击运行 |
 
@@ -85,7 +85,7 @@ npm run desktop:build
 src-tauri/target/release/bundle/dmg/LogTimeLine_0.1.0_aarch64.dmg
 ```
 
-本机默认打出当前芯片架构（Apple Silicon 为 `aarch64`）。GitHub Release 会打出 Intel + Apple Silicon 通用包。
+本机默认打出当前芯片架构（Apple Silicon 为 `aarch64`）。GitHub Release 在 `macos-latest` 上同样打出 Apple Silicon 包。
 
 ## 开发调试
 
