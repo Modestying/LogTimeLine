@@ -1,12 +1,12 @@
 import { useMemo, useRef, useState } from "react";
+import { useI18n } from "../I18nProvider";
 import type { FilterConfig, MergeMode, ReplaceRule } from "../types";
 import { emptyFilter, newReplaceRule } from "../types";
 import { transformText } from "../lib/transform";
 
 interface ImportModalProps {
+  kind?: "import" | "filter";
   initialText?: string;
-  title?: string;
-  confirmLabel?: string;
   hasCurrent: boolean;
   showMerge?: boolean;
   onClose: () => void;
@@ -21,14 +21,14 @@ const REDACT_RULES: Omit<ReplaceRule, "id">[] = [
 ];
 
 export function ImportModal({
+  kind = "import",
   initialText = "",
-  title = "导入文本",
-  confirmLabel = "导入",
   hasCurrent,
   showMerge = true,
   onClose,
   onApply,
 }: ImportModalProps) {
+  const { locale, t } = useI18n();
   const [source, setSource] = useState(initialText);
   const [fileNames, setFileNames] = useState<string[]>([]);
   const [filter, setFilter] = useState<FilterConfig>(emptyFilter);
@@ -53,6 +53,9 @@ export function ImportModal({
   };
 
   const canApply = result.keptLines > 0 && !result.error;
+  const nameSep = locale === "zh" ? "、" : ", ";
+  const title = kind === "filter" ? t("filterTitle") : t("importTitle");
+  const confirmLabel = kind === "filter" ? t("apply") : t("importConfirm");
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
@@ -64,7 +67,7 @@ export function ImportModal({
       >
         <header className="modal-head">
           <h2 id="import-title">{title}</h2>
-          <button type="button" className="icon-btn" onClick={onClose} aria-label="关闭">
+          <button type="button" className="icon-btn" onClick={onClose} aria-label={t("close")}>
             ×
           </button>
         </header>
@@ -72,8 +75,8 @@ export function ImportModal({
         <div className="modal-grid">
           <section className="modal-col">
             <div className="field-label">
-              源文本
-              {fileNames.length > 0 && <span className="muted"> · {fileNames.join("、")}</span>}
+              {t("sourceText")}
+              {fileNames.length > 0 && <span className="muted"> · {fileNames.join(nameSep)}</span>}
             </div>
             <div
               className={`dropzone${dragging ? " is-over" : ""}`}
@@ -88,9 +91,9 @@ export function ImportModal({
                 if (e.dataTransfer.files.length) void readFiles(e.dataTransfer.files);
               }}
             >
-              <p>拖入文件，或粘贴到下方</p>
+              <p>{t("dropHint")}</p>
               <button type="button" className="btn ghost" onClick={() => inputRef.current?.click()}>
-                选择文件
+                {t("chooseFiles")}
               </button>
               <input
                 ref={inputRef}
@@ -113,24 +116,24 @@ export function ImportModal({
           </section>
 
           <section className="modal-col">
-            <div className="field-label">筛选行</div>
+            <div className="field-label">{t("filterLines")}</div>
             <div className="filter-row">
               <label>
-                保留包含
+                {t("include")}
                 <textarea
                   rows={3}
                   value={filter.include}
                   onChange={(e) => setFilter((f) => ({ ...f, include: e.target.value }))}
-                  placeholder={"每行一条，留空则全部保留\n例如: /v1/api/order/pay"}
+                  placeholder={t("includePlaceholder")}
                 />
               </label>
               <label>
-                排除包含
+                {t("exclude")}
                 <textarea
                   rows={3}
                   value={filter.exclude}
                   onChange={(e) => setFilter((f) => ({ ...f, exclude: e.target.value }))}
-                  placeholder={"例如: kube-probe"}
+                  placeholder={t("excludePlaceholder")}
                 />
               </label>
             </div>
@@ -141,7 +144,7 @@ export function ImportModal({
                   checked={filter.regex}
                   onChange={(e) => setFilter((f) => ({ ...f, regex: e.target.checked }))}
                 />
-                正则
+                {t("regex")}
               </label>
               <label>
                 <input
@@ -149,24 +152,24 @@ export function ImportModal({
                   checked={filter.caseSensitive}
                   onChange={(e) => setFilter((f) => ({ ...f, caseSensitive: e.target.checked }))}
                 />
-                区分大小写
+                {t("caseSensitive")}
               </label>
               <label>
-                多条件
+                {t("multiCondition")}
                 <select
                   value={filter.includeMode}
                   onChange={(e) =>
                     setFilter((f) => ({ ...f, includeMode: e.target.value as "all" | "any" }))
                   }
                 >
-                  <option value="any">满足任一</option>
-                  <option value="all">同时满足</option>
+                  <option value="any">{t("matchAny")}</option>
+                  <option value="all">{t("matchAll")}</option>
                 </select>
               </label>
             </div>
 
             <div className="field-label">
-              替换
+              {t("replace")}
               <button
                 type="button"
                 className="link-btn"
@@ -177,7 +180,7 @@ export function ImportModal({
                   ])
                 }
               >
-                插入脱敏规则
+                {t("insertRedact")}
               </button>
             </div>
             <div className="rules">
@@ -186,13 +189,13 @@ export function ImportModal({
                   <input
                     value={rule.find}
                     onChange={(e) => updateRule(rule.id, { find: e.target.value })}
-                    placeholder="查找"
+                    placeholder={t("find")}
                   />
                   <span className="arrow">→</span>
                   <input
                     value={rule.replace}
                     onChange={(e) => updateRule(rule.id, { replace: e.target.value })}
-                    placeholder="替换为"
+                    placeholder={t("replaceWith")}
                   />
                   <label className="tiny">
                     <input
@@ -200,13 +203,13 @@ export function ImportModal({
                       checked={rule.regex}
                       onChange={(e) => updateRule(rule.id, { regex: e.target.checked })}
                     />
-                    正则
+                    {t("regex")}
                   </label>
                   <button
                     type="button"
                     className="icon-btn"
                     onClick={() => setRules((prev) => prev.filter((r) => r.id !== rule.id))}
-                    aria-label="删除规则"
+                    aria-label={t("deleteRule")}
                   >
                     ×
                   </button>
@@ -217,7 +220,7 @@ export function ImportModal({
                 className="btn ghost"
                 onClick={() => setRules((prev) => [...prev, newReplaceRule()])}
               >
-                添加替换
+                {t("addReplace")}
               </button>
             </div>
           </section>
@@ -225,21 +228,21 @@ export function ImportModal({
 
         <section className="preview-block">
           <div className="field-label">
-            预览
+            {t("preview")}
             <span className={result.error ? "error-text" : "muted"}>
               {result.error
                 ? result.error
-                : ` 读入 ${result.inputLines} 行 → 保留 ${result.keptLines} 行${
-                    result.replacedLines ? ` · 替换 ${result.replacedLines} 行` : ""
+                : ` ${t("previewStats", { input: result.inputLines, kept: result.keptLines })}${
+                    result.replacedLines ? t("previewReplaced", { n: result.replacedLines }) : ""
                   }`}
             </span>
           </div>
-          <pre className="preview">{preview.join("\n") || "（无匹配行）"}</pre>
+          <pre className="preview">{preview.join("\n") || t("noMatch")}</pre>
         </section>
 
         <footer className="modal-foot">
           {showMerge ? (
-            <div className="merge-modes" role="radiogroup" aria-label="合并方式">
+            <div className="merge-modes" role="radiogroup" aria-label={t("mergeMode")}>
               <label>
                 <input
                   type="radio"
@@ -247,7 +250,7 @@ export function ImportModal({
                   checked={mode === "overwrite"}
                   onChange={() => setMode("overwrite")}
                 />
-                覆盖当前
+                {t("overwrite")}
               </label>
               <label>
                 <input
@@ -257,7 +260,7 @@ export function ImportModal({
                   onChange={() => setMode("append")}
                   disabled={!hasCurrent}
                 />
-                追加到末尾
+                {t("append")}
               </label>
               <label>
                 <input
@@ -267,15 +270,15 @@ export function ImportModal({
                   onChange={() => setMode("timestamp")}
                   disabled={!hasCurrent}
                 />
-                按时间戳交错
+                {t("byTimestamp")}
               </label>
             </div>
           ) : (
-            <span className="muted">将用筛选结果替换当前文本</span>
+            <span className="muted">{t("replaceCurrentHint")}</span>
           )}
           <div className="foot-actions">
             <button type="button" className="btn ghost" onClick={onClose}>
-              取消
+              {t("cancel")}
             </button>
             <button
               type="button"

@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useI18n } from "../I18nProvider";
 import type { LogEvent } from "../types";
 import { eventTime, formatClock, formatDelta, formatDuration } from "../lib/parse";
 
@@ -28,6 +29,7 @@ function hashHue(value: string): number {
 }
 
 export function Timeline({ events, selectedLine, onSelect }: TimelineProps) {
+  const { t } = useI18n();
   const dated = useMemo(
     () =>
       [...events]
@@ -51,8 +53,8 @@ export function Timeline({ events, selectedLine, onSelect }: TimelineProps) {
   if (events.length === 0) {
     return (
       <div className="timeline-empty">
-        <p>时序图会从当前文本的时间戳生成。</p>
-        <p className="muted">支持 JSON 日志的 <code>@timestamp</code>，以及行内 ISO 时间。</p>
+        <p>{t("timelineEmpty")}</p>
+        <p className="muted">{t("timelineEmptyHint")}</p>
       </div>
     );
   }
@@ -60,8 +62,8 @@ export function Timeline({ events, selectedLine, onSelect }: TimelineProps) {
   if (dated.length === 0) {
     return (
       <div className="timeline-empty">
-        <p>已读取 {events.length} 行，但没有识别到时间戳。</p>
-        <p className="muted">导入 JSON 日志后，将按时间顺序排列请求。</p>
+        <p>{t("noTimestamp", { n: events.length })}</p>
+        <p className="muted">{t("noTimestampHint")}</p>
       </div>
     );
   }
@@ -75,7 +77,7 @@ export function Timeline({ events, selectedLine, onSelect }: TimelineProps) {
           </strong>
           <span className="muted">
             {" "}
-            · {dated.length} 条 · 跨度 {formatDelta(t1 - t0)}
+            · {t("eventCount", { n: dated.length })} · {t("span", { delta: formatDelta(t1 - t0) })}
           </span>
         </div>
         <div className="level-pills">
@@ -138,7 +140,7 @@ export function Timeline({ events, selectedLine, onSelect }: TimelineProps) {
         })}
       </ol>
       {undated.length > 0 && (
-        <p className="muted undated-note">{undated.length} 行没有时间戳，未放入时序。</p>
+        <p className="muted undated-note">{t("undated", { n: undated.length })}</p>
       )}
     </div>
   );

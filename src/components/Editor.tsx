@@ -5,11 +5,12 @@ interface EditorProps {
   onChange: (value: string) => void;
   selectedLine: number | null;
   onSelectLine: (line: number) => void;
+  placeholder: string;
 }
 
 const LINE_HEIGHT = 22;
 
-export function Editor({ value, onChange, selectedLine, onSelectLine }: EditorProps) {
+export function Editor({ value, onChange, selectedLine, onSelectLine, placeholder }: EditorProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const gutterRef = useRef<HTMLDivElement>(null);
   const lineCount = value.length === 0 ? 1 : value.split("\n").length;
@@ -66,7 +67,7 @@ export function Editor({ value, onChange, selectedLine, onSelectLine }: EditorPr
           const line = ta.value.slice(0, ta.selectionStart).split("\n").length - 1;
           onSelectLine(line);
         }}
-        placeholder="粘贴日志，或点击「导入」合并文本…"
+        placeholder={placeholder}
         style={{ lineHeight: `${LINE_HEIGHT}px` }}
       />
     </div>

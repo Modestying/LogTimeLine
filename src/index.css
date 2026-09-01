@@ -49,8 +49,8 @@ button {
 
 .app {
   height: 100%;
-  display: grid;
-  grid-template-rows: auto auto 1fr;
+  display: flex;
+  flex-direction: column;
   min-height: 0;
 }
 
@@ -101,6 +101,50 @@ button {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+  align-items: center;
+}
+
+.lang-switch {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.lang-switch button {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  padding: 6px 10px;
+}
+
+.lang-switch button.is-on {
+  background: var(--elev);
+  color: var(--accent);
+}
+
+.version-chip {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  padding: 0 4px;
+}
+
+.update-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 18px;
+  border-bottom: 1px solid var(--line);
+  font-size: 12px;
+}
+
+.update-bar.status-available {
+  color: var(--accent);
+}
+
+.update-bar.status-error {
+  color: var(--error);
 }
 
 .btn {
@@ -182,6 +226,7 @@ button {
 }
 
 .workspace {
+  flex: 1;
   min-height: 0;
   display: grid;
   gap: 0;
