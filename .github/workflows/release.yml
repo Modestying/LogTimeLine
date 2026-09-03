@@ -54,17 +54,40 @@ jobs:
         if: matrix.platform == 'macos-latest'
         run: |
           set -euo pipefail
-          APP=(src-tauri/target/release/bundle/macos/*.app)
-          codesign --force --deep --sign - "${APP[0]}"
-          codesign --verify --deep --strict "${APP[0]}"
-          codesign -dv --verbose=2 "${APP[0]}"
+          find src-tauri/target -path '*/bundle/*' \( -name '*.app' -o -name '*.dmg' \) -print || true
+
+          APP=$(find src-tauri/target -type d -name 'LogTimeLine.app' | head -n 1)
+          if [ -z "$APP" ]; then
+            APP=$(find src-tauri/target -type d -name '*.app' | head -n 1)
+          fi
+          if [ -z "$APP" ]; then
+            DMG=$(find src-tauri/target -name '*.dmg' | head -n 1)
+            if [ -z "$DMG" ]; then
+              echo "No .app or .dmg found under src-tauri/target"
+              exit 1
+            fi
+            echo "Extracting app from $DMG"
+            MOUNT=$(mktemp -d)
+            hdiutil attach "$DMG" -nobrowse -mountpoint "$MOUNT"
+            APP_SRC=$(find "$MOUNT" -maxdepth 2 -name '*.app' | head -n 1)
+            mkdir -p src-tauri/target/release/bundle/macos
+            ditto "$APP_SRC" src-tauri/target/release/bundle/macos/LogTimeLine.app
+            hdiutil detach "$MOUNT"
+            APP=src-tauri/target/release/bundle/macos/LogTimeLine.app
+          fi
+
+          echo "Signing $APP"
+          codesign --force --deep --sign - "$APP"
+          codesign --verify --deep --strict "$APP"
+          codesign -dv --verbose=2 "$APP"
+
           VERSION=$(node -p "require('./package.json').version")
           ARCH=$(uname -m)
           if [ "$ARCH" = arm64 ]; then ARCH_LABEL=aarch64; else ARCH_LABEL=x64; fi
-          DMG="src-tauri/target/release/bundle/dmg/LogTimeLine_${VERSION}_${ARCH_LABEL}.dmg"
-          mkdir -p "$(dirname "$DMG")"
-          rm -f "$DMG"
-          hdiutil create -volname LogTimeLine -srcfolder "${APP[0]}" -ov -format UDZO "$DMG"
+          DMG_OUT="src-tauri/target/release/bundle/dmg/LogTimeLine_${VERSION}_${ARCH_LABEL}.dmg"
+          mkdir -p "$(dirname "$DMG_OUT")"
+          rm -f "$DMG_OUT"
+          hdiutil create -volname LogTimeLine -srcfolder "$APP" -ov -format UDZO "$DMG_OUT"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v7
