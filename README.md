@@ -56,7 +56,13 @@ go-zero 默认 JSON 日志是**每行一条**，字段与本工具对齐，例�
 | Windows | `LogTimeLine_x.x.x_x64-setup.exe` | 双击安装 |
 | Linux | `.AppImage` 或 `.deb` | AppImage 赋权后双击运行 |
 
-macOS 未签名时，若提示无法打开：右键图标选「打开」，或到「系统设置 → 隐私与安全性」允许运行。
+macOS 若提示「文件已损坏」：不是安装包坏了，是未公证应用被系统隔离。把应用拖到「应用程序」后，在终端执行：
+
+```bash
+xattr -cr /Applications/LogTimeLine.app
+```
+
+然后右键图标选「打开」，或到「系统设置 → 隐私与安全性」允许运行。
 
 ### 发布到 GitHub Release
 

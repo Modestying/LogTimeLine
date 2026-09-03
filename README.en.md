@@ -58,7 +58,13 @@ Release builds are desktop installers. No Node.js required.
 | Windows | `LogTimeLine_x.x.x_x64-setup.exe` | Double-click to install |
 | Linux | `.AppImage` or `.deb` | Make the AppImage executable, then run it |
 
-Unsigned macOS builds: right-click the app and choose **Open**, or allow it under **System Settings → Privacy & Security**.
+If macOS says the app is **damaged**, the download is fine — Gatekeeper is blocking an unnotarized build. After dragging it to Applications, run:
+
+```bash
+xattr -cr /Applications/LogTimeLine.app
+```
+
+Then right-click the icon and choose **Open**, or allow it under **System Settings → Privacy & Security**.
 
 ### Publish a GitHub Release
 
