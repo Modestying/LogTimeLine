@@ -79,6 +79,13 @@ export const messages = {
     eventCount: "{n} 条",
     span: "跨度 {delta}",
     undated: "{n} 行没有时间戳，未放入时序。",
+    findPlaceholder: "查找…",
+    findNext: "下一个 (Enter / F3)",
+    findPrev: "上一个 (Shift+Enter)",
+    findMatchOf: "{current} / {total}",
+    findNoMatches: "无匹配",
+    findInvalidRegex: "正则无效",
+    findClose: "关闭查找",
   },
   en: {
     tagline: "Merge logs, filter and replace, then build a timeline",
@@ -146,6 +153,13 @@ export const messages = {
     eventCount: "{n} events",
     span: "span {delta}",
     undated: "{n} lines have no timestamp and were left off the timeline.",
+    findPlaceholder: "Find…",
+    findNext: "Next (Enter / F3)",
+    findPrev: "Previous (Shift+Enter)",
+    findMatchOf: "{current} / {total}",
+    findNoMatches: "No matches",
+    findInvalidRegex: "Invalid regex",
+    findClose: "Close find",
   },
 } as const;
 

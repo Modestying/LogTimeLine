@@ -1,3 +1,5 @@
+export type LineSelectionSource = "editor-click" | "editor-scroll" | "timeline" | "timeline-scroll" | "find";
+
 export interface LogEvent {
   id: string;
   lineIndex: number;

@@ -202,6 +202,21 @@ export function parseLogText(text: string): LogEvent[] {
   });
 }
 
+export function nearestDatedEvent(events: LogEvent[], line: number): LogEvent | null {
+  let atOrAfter: LogEvent | null = null;
+  let lastBefore: LogEvent | null = null;
+  for (const event of events) {
+    if (!event.timestamp) continue;
+    if (event.lineIndex === line) return event;
+    if (event.lineIndex >= line) {
+      if (!atOrAfter || event.lineIndex < atOrAfter.lineIndex) atOrAfter = event;
+    } else if (!lastBefore || event.lineIndex > lastBefore.lineIndex) {
+      lastBefore = event;
+    }
+  }
+  return atOrAfter ?? lastBefore;
+}
+
 export function eventTime(event: LogEvent): number | null {
   return event.timestamp ? event.timestamp.getTime() : null;
 }

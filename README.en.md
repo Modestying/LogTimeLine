@@ -42,7 +42,8 @@ Enable JSON logging in go-zero (`logx` / rest `Log` config) so each line is a si
 - **Replace**: multiple find/replace rules; one-click redact for tokens and phone numbers
 - **Merge**: overwrite, append, or interleave by timestamp
 - **Timeline**: reads `@timestamp` (also ISO timestamps in plain text)
-- **Jump**: click a timeline event to highlight the matching editor line
+- **Jump**: click a timeline event or a log line to keep both panes in sync; in split view, scrolling the text pane follows the matching timeline event
+- **Find**: `Ctrl/Cmd + F` searches the current text, with match-case and regex options
 - **Export**: download the merged text as `merged-logs.txt`
 
 The current document is stored in `localStorage` and survives a refresh.
@@ -120,7 +121,7 @@ pnpm dev
 4. The timeline on the right updates by timestamp. Switch to **Text** or **Timeline** for a single pane.
 5. Use **Filter current** to process text already in the editor.
 
-Shortcuts: `Ctrl/Cmd + O` to import, `Esc` to close the dialog.
+Shortcuts: `Ctrl/Cmd + O` to import, `Ctrl/Cmd + F` to find, `F3` for next match, `Esc` to close the dialog or find bar.
 
 ## Log format
 

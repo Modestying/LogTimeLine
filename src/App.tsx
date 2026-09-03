@@ -7,7 +7,7 @@ import { mergeTexts } from "./lib/merge";
 import { parseLogText } from "./lib/parse";
 import { SAMPLE_LOG } from "./lib/sample";
 import { APP_VERSION, checkForUpdate, type UpdateResult } from "./lib/updates";
-import type { MergeMode } from "./types";
+import type { LineSelectionSource, MergeMode } from "./types";
 
 const STORAGE_KEY = "logtimeline:text";
 
@@ -18,8 +18,11 @@ export default function App() {
   const { locale, setLocale, t } = useI18n();
   const [text, setText] = useState(() => localStorage.getItem(STORAGE_KEY) ?? "");
   const [selectedLine, setSelectedLine] = useState<number | null>(null);
+  const [selectionSource, setSelectionSource] = useState<LineSelectionSource>("timeline");
   const [modal, setModal] = useState<ModalKind>(null);
   const [layout, setLayout] = useState<Layout>("split");
+  const [findOpen, setFindOpen] = useState(false);
+  const [findNonce, setFindNonce] = useState(0);
   const [update, setUpdate] = useState<UpdateResult | { status: "idle" } | { status: "checking" }>({
     status: "idle",
   });
@@ -32,6 +35,11 @@ export default function App() {
   const events = useMemo(() => parseLogText(text), [text]);
   const hasCurrent = text.trim().length > 0;
   const datedCount = events.filter((e) => e.timestamp).length;
+
+  const selectLine = useCallback((line: number, source: LineSelectionSource) => {
+    setSelectedLine(line);
+    setSelectionSource(source);
+  }, []);
 
   const applyIncoming = useCallback(
     (incoming: string, mode: MergeMode) => {
@@ -63,6 +71,12 @@ export default function App() {
     void runUpdateCheck(false);
   }, [runUpdateCheck]);
 
+  const openFind = useCallback(() => {
+    if (layout === "timeline") setLayout("split");
+    setFindOpen(true);
+    setFindNonce((n) => n + 1);
+  }, [layout]);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const meta = e.metaKey || e.ctrlKey;
@@ -70,11 +84,22 @@ export default function App() {
         e.preventDefault();
         setModal("import");
       }
-      if (e.key === "Escape") setModal(null);
+      if (meta && e.key.toLowerCase() === "f") {
+        e.preventDefault();
+        if (modal) return;
+        openFind();
+      }
+      if (e.key === "Escape") {
+        if (modal) {
+          setModal(null);
+          return;
+        }
+        if (findOpen) setFindOpen(false);
+      }
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
+  }, [findOpen, modal, openFind]);
 
   return (
     <div className="app">
@@ -186,16 +211,32 @@ export default function App() {
           <section className="pane pane-editor">
             <div className="pane-head">
               <h2>{t("currentText")}</h2>
-              <span className="muted">
-                {text.trim() ? t("lines", { n: text.split("\n").length }) : t("empty")}
-              </span>
+              <div className="pane-head-actions">
+                <span className="muted">
+                  {text.trim() ? t("lines", { n: text.split("\n").length }) : t("empty")}
+                </span>
+                <button
+                  type="button"
+                  className="btn ghost compact"
+                  title={`${t("find")} (Ctrl/Cmd+F)`}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={openFind}
+                >
+                  {t("find")}
+                </button>
+              </div>
             </div>
             <Editor
               value={text}
               onChange={setText}
               selectedLine={selectedLine}
-              onSelectLine={setSelectedLine}
+              selectionSource={selectionSource}
+              onSelectLine={selectLine}
               placeholder={t("editorPlaceholder")}
+              findOpen={findOpen}
+              findNonce={findNonce}
+              onCloseFind={() => setFindOpen(false)}
+              syncOnScroll={layout === "split"}
             />
           </section>
         )}
@@ -205,7 +246,13 @@ export default function App() {
               <h2>{t("timeline")}</h2>
               <span className="muted">{t("datedEvents", { n: datedCount })}</span>
             </div>
-            <Timeline events={events} selectedLine={selectedLine} onSelect={(event) => setSelectedLine(event.lineIndex)} />
+            <Timeline
+              events={events}
+              selectedLine={selectedLine}
+              selectionSource={selectionSource}
+              onSelect={(event, source) => selectLine(event.lineIndex, source)}
+              syncOnScroll={layout === "split"}
+            />
           </section>
         )}
       </main>
